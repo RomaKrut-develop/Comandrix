@@ -5,13 +5,13 @@ from pygame import mixer
 from datetime import datetime
 import os
 
+
 class App:  # Основной класс
     def __init__(self, root):  # Конструктор класса
         self.root = root
         self.root.title('Comandrix - ПКС')
         self.root.geometry('600x470')
         self.root.resizable(False, False)
-        self.font_for_all = 'DOSFont'
         self.sounds_enabled = True
         self.time_label = None
         self.file_counter = 0
@@ -46,14 +46,14 @@ class App:  # Основной класс
                 overflow_label = Label(
                     self.desktop_frame_screen,
                     text="[...]",
-                    font=self.font_for_all, bg='black', fg='gray')
+                    font=('DOSFont', 18), bg='black', fg='gray')
                 overflow_label.place(x=x_pos, y=y_pos)
                 break  # Прекращаем отображение
 
             file_icon = Label(
                 self.desktop_frame_screen,
                 text=f"▄ {filename}",
-                font=self.font_for_all, bg='black', fg='lime')
+                font=('DOSFont', 18), bg='black', fg='lime')
             file_icon.place(x=x_pos, y=y_pos)
             file_icon.bind("<Button-1>", lambda e,
                            path=filepath: self.open_file_context(path))
@@ -116,17 +116,17 @@ class App:  # Основной класс
 
     def set_up_elements(self):  # Расставляем элементы загрузочного экрана
         self.main_label = Label(self.main_frame, text='- Добро пожаловать в Computerix!\nВыберите пункт загрузки',
-                                font=self.font_for_all, bg='black', fg='lime')
+                                font=('DOSFont', 18), bg='black', fg='lime')
 
         self.start_button = Button(self.main_frame, text='<Войти в систему>', command=self.get_started,
-                                   font=self.font_for_all, bg='black', fg='lime',
+                                   font=('DOSFont', 18), bg='black', fg='lime',
                                    activebackground='black', activeforeground='white',
                                    relief=FLAT, borderwidth=0, highlightthickness=0)
 
         self.turn_off_sounds_var = BooleanVar(value=False)
         self.turn_off_sounds_checkbox = Checkbutton(
             self.main_frame, text='<Выключить звуки>',
-            font=f'{self.font_for_all} 14',
+            font=f'{'DOSFont'} 18',
             variable=self.turn_off_sounds_var,
             command=self.toggle_sounds,
             bg='black', fg='lime',
@@ -136,7 +136,7 @@ class App:  # Основной класс
             relief=FLAT, borderwidth=0, highlightthickness=0)
 
         self.exit_button = Button(self.main_frame, text='<Завершить сеанс>', command=self.exit,
-                                  font=self.font_for_all, bg='black', fg='lime',
+                                  font=('DOSFont', 18), bg='black', fg='lime',
                                   activebackground='black', activeforeground='white',
                                   relief=FLAT, borderwidth=0, highlightthickness=0)
 
@@ -157,7 +157,7 @@ class App:  # Основной класс
             self.get_started_label.config(text='- Запуск командного центра')
             self.root.after(1500, self.desktop_frame)
 
-    def get_started(self): # Псевдо-загрузочный экран
+    def get_started(self):  # Псевдо-загрузочный экран
         self.button_sound()
         self.main_frame.destroy()
 
@@ -166,12 +166,12 @@ class App:  # Основной класс
 
         self.get_started_process_label = Label(
             self.get_started_frame, text='ЭТАПЫ:',
-            font=self.font_for_all, bg='black', fg='lime')
+            font=('DOSFont', 18), bg='black', fg='lime')
         self.get_started_process_label.place(x=20, y=20)
 
         self.get_started_label = Label(
             self.get_started_frame, text='- Выполняется инициализация',
-            font=self.font_for_all, bg='black', fg='lime')
+            font=('DOSFont', 18), bg='black', fg='lime')
         self.get_started_label.place(x=50, y=60)
 
         self.update_loading_text(0)
@@ -213,16 +213,17 @@ class App:  # Основной класс
 
         # Заголовок
         title_label = Label(editor_frame, text=f"Editrix. Редак.: {filename}",
-                            font=self.font_for_all, bg='black', fg='lime')
+                        font=('DOSFont', 18), bg='black', fg='lime')
         title_label.pack(pady=10)
 
         # Текстовое поле
-        self.text_area = Text(editor_frame, font=self.font_for_all,
+        self.text_area = Text(editor_frame, font=('DOSFont', 18),
                               bg='black', fg='lime', insertbackground='lime',
                               relief=FLAT, wrap=WORD, height=15)
         self.text_area.pack(fill='both', expand=True, padx=20, pady=10)
 
-        self.text_area.tag_config("sel", background="white", foreground="black")
+        self.text_area.tag_config(
+            "sel", background="white", foreground="black")
 
         # Читаем содержимое файла
         try:
@@ -236,13 +237,13 @@ class App:  # Основной класс
         button_frame = Frame(editor_frame, bg='black')
         button_frame.pack(pady=10)
 
-        save_button = Button(button_frame, text='Сохранить', font=self.font_for_all,
+        save_button = Button(button_frame, text='Сохранить', font=('DOSFont', 18),
                              bg='black', fg='lime', activebackground='black',
                              activeforeground='white', relief=FLAT, borderwidth=0,
                              command=lambda: self.save_file(filepath, editor_frame))
         save_button.pack(side=LEFT, padx=10)
 
-        cancel_button = Button(button_frame, text='Отмена', font=self.font_for_all,
+        cancel_button = Button(button_frame, text='Отмена', font=('DOSFont', 18),
                                bg='black', fg='lime', activebackground='black',
                                activeforeground='white', relief=FLAT, borderwidth=0,
                                command=lambda: self.cancel_edit(editor_frame))
@@ -289,7 +290,7 @@ class App:  # Основной класс
                 break
 
         context_menu = Menu(
-            tearoff=0, font=self.font_for_all, bg='black', fg='lime')
+            tearoff=0, font=('DOSFont', 18), bg='black', fg='lime')
         if clicked_on_file:
             context_menu.add_command(label='Создать', command=lambda: self.open_file_context(
                 self.current_right_clicked_file))
@@ -326,20 +327,20 @@ class App:  # Основной класс
 
         # Заголовок
         title_label = Label(self.start_menu_frame, text=f"Выберите функцию:",
-                            font=self.font_for_all, bg='black', fg='lime')
+                            font=('DOSFont', 18), bg='black', fg='lime')
         title_label.pack(pady=1)
 
         # Кнопки
         return_button = Button(self.start_menu_frame, text='[Рабочий стол]', command=self.desktop_frame,
-                               font=self.font_for_all, bg='black', fg='lime',
+                               font=('DOSFont', 18), bg='black', fg='lime',
                                activebackground='black', activeforeground='white',
                                relief=FLAT, borderwidth=0, highlightthickness=0)
         terminal_button = Button(self.start_menu_frame, text='[Открыть терминал]', command=self.terminal_session,
-                                 font=self.font_for_all, bg='black', fg='lime',
+                                 font=('DOSFont', 18), bg='black', fg='lime',
                                  activebackground='black', activeforeground='white',
                                  relief=FLAT, borderwidth=0, highlightthickness=0)
         exit_button = Button(self.start_menu_frame, text='[Завершить сеанс]', command=self.exit,
-                             font=self.font_for_all, bg='black', fg='lime',
+                             font=('DOSFont', 18), bg='black', fg='lime',
                              activebackground='black', activeforeground='white',
                              relief=FLAT, borderwidth=0, highlightthickness=0)
 
@@ -393,11 +394,13 @@ class App:  # Основной класс
             relief=FLAT
         )
         self.input_entry.pack(side='left', fill='x', expand=True)
-        self.input_entry.bind('<Return>', self.process_command)  # Enter = выполнить команду
+        # Enter = выполнить команду
+        self.input_entry.bind('<Return>', self.process_command)
         self.input_entry.focus_set()  # Фокус на поле ввода
 
         # Выводим приветственное сообщение
-        self.print_output("Comandrix Terminal v1.0\nВведите 'help' для списка команд\n")
+        self.print_output(
+            "Comandrix Terminal v1.0\nВведите 'help' для списка команд\n")
 
     def print_output(self, text):
         # Выводит текст в терминал
@@ -422,7 +425,8 @@ class App:  # Основной класс
         if command.lower() in ('quit'):
             self.desktop_frame()  # Возвращаемся на рабочий стол
         elif command.lower() == 'help':
-            self.print_output("Доступные команды:\n  help - справка\n  exit - выход\n  cls - очистить терминал\n  create <имя> - создать файл\n  del <имя> - удалить файл\n  list - список файлов\n")
+            self.print_output(
+                "Доступные команды:\n  help - справка\n  exit - выход\n  cls - очистить терминал\n  create <имя> - создать файл\n  del <имя> - удалить файл\n  list - список файлов\n")
         elif command.lower() == 'cls':
             self.output_area.configure(state='normal')
             self.output_area.delete(1.0, 'end')  # Очищаем терминал
@@ -444,29 +448,30 @@ class App:  # Основной класс
         if not filename:
             self.print_output("Ошибка: укажите имя файла\n")
             return
-        
+
         # Добавляем расширение .txt, если его нет
         if not filename.lower().endswith('.txt'):
             filename += '.txt'
-        
+
         filepath = os.path.join(self.storage_path, filename)
-        
+
         try:
             # Проверяем, существует ли файл
             if os.path.exists(filepath):
-                self.print_output(f"Ошибка: файл '{filename}' уже существует\n")
+                self.print_output(
+                    f"Ошибка: файл '{filename}' уже существует\n")
                 return
-            
+
             # Создаем файл
             with open(filepath, 'w', encoding='utf-8') as f:
                 f.write("")
-            
+
             self.print_output(f"Файл '{filename}' успешно создан\n")
-            
+
             # Обновляем список файлов на рабочем столе
             if hasattr(self, 'desktop_frame_screen'):
                 self.load_files_from_storage()
-                
+
         except Exception as e:
             pass
 
@@ -475,27 +480,27 @@ class App:  # Основной класс
         if not filename:
             self.print_output("Ошибка: укажите имя файла\n")
             return
-        
+
         # Добавляем расширение .txt, если его нет
         if not filename.lower().endswith('.txt'):
             filename += '.txt'
-        
+
         filepath = os.path.join(self.storage_path, filename)
-        
+
         try:
             # Проверяем, существует ли файл
             if not os.path.exists(filepath):
                 self.print_output(f"Ошибка: файл '{filename}' не найден\n")
                 return
-            
+
             # Удаляем файл
             os.remove(filepath)
             self.print_output(f"Файл '{filename}' успешно удален\n")
-            
+
             # Обновляем список файлов на рабочем столе
             if hasattr(self, 'desktop_frame_screen'):
                 self.load_files_from_storage()
-                
+
         except Exception as e:
             pass
 
@@ -508,7 +513,7 @@ class App:  # Основной класс
                 mixer.music.load('snd/start.mp3')
                 mixer.music.play()
             except Exception as e:
-                 pass
+                pass
 
         # Отменяем предыдущий after-вызов, чтобы не было конфликта
         if self.after_id is not None:
@@ -530,7 +535,7 @@ class App:  # Основной класс
         self.time_label = Label(
             self.desktop_frame_screen,
             text=f"[--Comandrix--]----------------[:-{current_time}-:]",
-            font=self.font_for_all, bg='black', fg='lime')
+            font=('DOSFont', 18), bg='black', fg='lime')
         self.time_label.pack(pady=1)
 
         # Запускаем обновление времени
@@ -540,7 +545,7 @@ class App:  # Основной класс
         self.start_button = Button(
             self.desktop_frame_screen,
             text="----\n|(S)|\n----",
-            font=self.font_for_all, bg='black', fg='lime',
+            font=('DOSFont', 18), bg='black', fg='lime',
             activebackground='black', activeforeground='lime',
             relief=FLAT, borderwidth=0, highlightthickness=0, command=self.start_menu)
         self.start_button.place(x=0, y=395)
@@ -555,6 +560,7 @@ class App:  # Основной класс
         messagebox.showinfo(
             title='О программе',
             message='Система командной строки для узкоспециализируемых работ, с текстовым интерфейсом\n\nПКС - Персональная командная строка\nРазработчик: Роман Чомахидзе')
+
 
 if __name__ == "__main__":
     mixer.init()
