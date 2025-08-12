@@ -4,7 +4,7 @@ import sys
 from pygame import mixer
 from datetime import datetime
 import os
-
+from tkinter.font import Font
 
 class App:  # Основной класс
     def __init__(self, root):  # Конструктор класса
@@ -22,42 +22,62 @@ class App:  # Основной класс
         self.after_id = None  # Для отмены after-вызова
         self.ensure_storage()
 
+    def check_dos_font(self):
+
+        # Проверяем, существует ли шрифт DOSFont
+        try:
+            test_font = Font(family="DOSFont", size=12)
+            actual_font = test_font.actual()
+            
+            # Если tkinter подменил шрифт, actual['family'] может отличаться
+            if actual_font['family'] != "DOSFont":
+                raise RuntimeError("Шрифт DOSFont не найден")
+        except:
+            # Если шрифт не найден, показываем предупреждение
+            messagebox.showwarning(
+                "Ошибка шрифта",
+                "Шрифт DOSFont не установлен в системе!\n"
+                "Некоторые элементы интерфейса могут отображаться некорректно.\n\n"
+                "Вы можете установить шрифт в папке проекта."
+            )
+
     def ensure_storage(self):
         # Создаёт папку Storage, если её нет
         if not os.path.exists(self.storage_path):
             os.makedirs(self.storage_path)
 
     def load_files_from_storage(self):
-        # Загружает все .txt файлы из папки Storage и отображает на рабочем столе в виде вертикального списка
-        files = [f for f in os.listdir(
-            self.storage_path) if f.endswith('.txt')]
+        # Загружает файлы из хранилища и отображает их на рабочем столе
+        # Сначала очищаем старые иконки
+        self.clear_file_icons()
+        
+        # Затем загружаем файлы
+        files = [f for f in os.listdir(self.storage_path) if f.endswith('.txt')]
         self.file_counter = len(files)
-
-        # Начальная позиция
+        
+        # Остальной код метода остается без изменений
         x_pos = 20
         y_pos = 40
-        spacing = 35  # Расстояние между иконками
-
+        spacing = 35
+        
         for idx, filename in enumerate(files):
             filepath = os.path.join(self.storage_path, filename)
-
-            # Проверяем, не выходит ли за нижнюю границу (панель времени и кнопка "Пуск")
-            if y_pos + 30 > 380:  # Если следующий файл не влезет
+            
+            if y_pos + 30 > 380:
                 overflow_label = Label(
                     self.desktop_frame_screen,
                     text="[...]",
                     font=('DOSFont', 18), bg='black', fg='gray')
                 overflow_label.place(x=x_pos, y=y_pos)
-                break  # Прекращаем отображение
-
+                break
+                
             file_icon = Label(
                 self.desktop_frame_screen,
                 text=f"▄ {filename}",
                 font=('DOSFont', 18), bg='black', fg='lime')
             file_icon.place(x=x_pos, y=y_pos)
-            file_icon.bind("<Button-1>", lambda e,
-                           path=filepath: self.open_file_context(path))
-
+            file_icon.bind("<Button-1>", lambda e, path=filepath: self.open_file_context(path))
+            
             self.file_icons.append({
                 'label': file_icon,
                 'name': filename,
@@ -65,8 +85,8 @@ class App:  # Основной класс
                 'x': x_pos,
                 'y': y_pos
             })
-
-            y_pos += spacing  # Сдвигаем вниз
+            
+            y_pos += spacing
 
     def create_menu(self):  # Filedialog-меню
         main_menu = Menu(self.root)
@@ -125,7 +145,7 @@ class App:  # Основной класс
 
         self.turn_off_sounds_var = BooleanVar(value=False)
         self.turn_off_sounds_checkbox = Checkbutton(
-            self.main_frame, text='<Выключить звуки>',
+            self.main_frame, text='<Выключить системные звуки>',
             font=f'{'DOSFont'} 18',
             variable=self.turn_off_sounds_var,
             command=self.toggle_sounds,
@@ -140,9 +160,15 @@ class App:  # Основной класс
                                   activebackground='black', activeforeground='white',
                                   relief=FLAT, borderwidth=0, highlightthickness=0)
 
+        self.start_terminal_button = Button(self.main_frame, text='<Запустить терминал>', command=self.error_sound,
+                                            font=('DOSFont', 18), bg='black', fg='lime',
+                                            activebackground='black', activeforeground='white',
+                                            relief=FLAT, borderwidth=0, highlightthickness=0)
+
         self.start_button.place(x=10, y=400)
         self.exit_button.place(x=360, y=400)
-        self.turn_off_sounds_checkbox.place(x=20, y=350)
+        self.turn_off_sounds_checkbox.place(x=20, y=300)
+        self.start_terminal_button.place(x=10, y=350)
         self.main_label.place(x=50, y=20)
 
     def update_loading_text(self, step, total_steps=2):  # Текст загрузки
@@ -176,11 +202,48 @@ class App:  # Основной класс
 
         self.update_loading_text(0)
 
+    # БИЛДЕРЫ ОКОН
+
+    def error_window_file_delete_builder(self):
+        error_label = Label(self.desktop_frame_screen,
+                            text=f"______[Ошибка]______\n|                  |\n| Невозможно удалить |\n|                  |\n|                  |\n-----------------",
+                            font=('DOSFont', 18), bg='black', fg='lime')
+
+        error_button = Button(self.desktop_frame_screen, text="■",
+                              font=('DOSFont', 18), bg='black', fg='lime',
+                              activebackground='black', activeforeground='white',
+                              relief=FLAT, borderwidth=0, highlightthickness=0,
+                              command=lambda: (error_label.destroy(), error_button.destroy()))
+
+        error_label.place(x=140, y=120)
+        error_button.place(x=380, y=123)
+
+        error_label.lift()
+        error_button.lift()
+
+    def congrat_window_file_delete_builder(self):
+        congrat_label = Label(self.desktop_frame_screen,
+                            text=f"______[Успех]______\n|                  |\n|Успешно удален файл!|\n|                  |\n|                  |\n------------------",
+                            font=('DOSFont', 18), bg='black', fg='lime')
+
+        congrat_button = Button(self.desktop_frame_screen, text="■",
+                                font=('DOSFont', 18), bg='black', fg='lime',
+                                activebackground='black', activeforeground='white',
+                                relief=FLAT, borderwidth=0, highlightthickness=0,
+                                command=lambda: (congrat_label.destroy(), congrat_button.destroy()))
+
+        congrat_label.place(x=140, y=120)
+        congrat_button.place(x=380, y=123)
+
+        # Поднимаем поверх других элементов
+        congrat_label.lift()
+        congrat_button.lift()
+
     def create_new_file(self):
         # Создаёт новый файл и сразу открывает редактор
         self.button_sound()
         self.file_counter += 1
-        filename = f"Новый файл {self.file_counter}.txt"
+        filename = f"Файл{self.file_counter}.txt"
         filepath = os.path.join(self.storage_path, filename)
 
         # Создаём пустой файл
@@ -213,7 +276,7 @@ class App:  # Основной класс
 
         # Заголовок
         title_label = Label(editor_frame, text=f"Editrix. Редак.: {filename}",
-                        font=('DOSFont', 18), bg='black', fg='lime')
+                            font=('DOSFont', 18), bg='black', fg='lime')
         title_label.pack(pady=10)
 
         # Текстовое поле
@@ -252,7 +315,7 @@ class App:  # Основной класс
         # Сохраняем путь к файлу
         self.current_editing_file = filepath
 
-    def save_file(self, filepath, editor_frame):
+    def save_file(self, filepath, editor_frame):  # Сохранение файлов
         # Сохраняет содержимое редактора в файл
         try:
             content = self.text_area.get(1.0, END)
@@ -263,7 +326,36 @@ class App:  # Основной класс
         except Exception as e:
             pass
 
-    def cancel_edit(self, editor_frame):
+    def clear_file_icons(self):
+        # Удаляет все иконки файлов с рабочего стола
+        for icon in self.file_icons:
+            icon['label'].destroy()
+        self.file_icons = []  # Очищаем список
+
+    def delete_file(self):
+        # Удаляет выбранный файл
+        self.button_sound()
+
+        if not hasattr(self, 'current_right_clicked_file') or not self.current_right_clicked_file:
+            return
+
+        filepath = self.current_right_clicked_file
+        filename = os.path.basename(filepath)
+
+        if filename == "README.txt":
+            self.error_sound()
+            self.error_window_file_delete_builder()
+            return
+            
+        try:
+            os.remove(filepath)
+            # Полностью перезагружаем список файлов
+            self.load_files_from_storage()
+            self.congrat_window_file_delete_builder()
+        except Exception as e:
+            pass
+
+    def cancel_edit(self, editor_frame):  # Отмена редактирования файлов
         self.close_editor(editor_frame)
 
     def close_editor(self, editor_frame):
@@ -280,23 +372,30 @@ class App:  # Основной класс
 
         # Проверяем, попали ли мы по файлу
         clicked_on_file = False
+        self.current_right_clicked_file = None  # Сбрасываем
+
         for icon in self.file_icons:
-            label = icon['label']
-            # Простая проверка попадания (приблизительно)
-            if (icon['x'] <= event.x <= icon['x'] + 100 and
-                    icon['y'] <= event.y <= icon['y'] + 30):
+            # Простая проверка попадания по координатам
+            if (icon['x'] <= event.x <= icon['x'] + 400 and  # Ширина иконки ~200 пикселей
+                    icon['y'] <= event.y <= icon['y'] + 30):  # Высота ~30
                 clicked_on_file = True
                 self.current_right_clicked_file = icon['path']
                 break
 
-        context_menu = Menu(
-            tearoff=0, font=('DOSFont', 18), bg='black', fg='lime')
+        # Создаём контекстное меню
+        context_menu = Menu(tearoff=0, font=(
+            'DOSFont', 18), bg='black', fg='lime', selectcolor='lime', activebackground='white', activeforeground='black')
         if clicked_on_file:
-            context_menu.add_command(label='Создать', command=lambda: self.open_file_context(
-                self.current_right_clicked_file))
+            context_menu.add_command(
+                label='Удалить',
+                command=self.delete_file
+            )
         else:
             context_menu.add_command(
-                label='Создать файл', command=self.create_new_file)
+                label='Создать файл',
+                command=self.create_new_file
+            )
+
         context_menu.post(event.x_root, event.y_root)
 
     def update_time(self):  # Обновление времени
@@ -308,6 +407,45 @@ class App:  # Основной класс
                 1000, self.update_time)  # Сохраняем ID
         else:
             self.after_id = None
+
+    def parameters(self):  # Параметры системы, фрейм
+        for widget in self.root.winfo_children():
+            widget.destroy()
+
+        if self.sounds_enabled:
+            try:
+                mixer.music.load('snd/beep.mp3')
+                mixer.music.play()
+            except Exception as e:
+                self.error_sound()
+
+        # Создаём фрейм меню
+        self.parameters_frame = Frame(self.root, bg='black')
+        self.parameters_frame.pack(fill='both', expand=True)
+
+        # Заголовок
+        title_label = Label(self.parameters_frame, text="Параметры:",
+                            font=('DOSFont', 18), bg='black', fg='lime')
+        title_label.pack(pady=1)
+
+        self.turn_off_sounds_checkbox = Checkbutton(
+            self.parameters_frame, text='<Выключить системные звуки>      |',
+            font=f'{'DOSFont'} 18',
+            variable=self.turn_off_sounds_var,
+            command=self.toggle_sounds,
+            bg='black', fg='lime',
+            activebackground='black',
+            activeforeground='lime',
+            selectcolor='black',
+            relief=FLAT, borderwidth=0, highlightthickness=0)
+
+        exit_parameters_button = Button(self.parameters_frame, text='[<]', command=self.desktop_frame,
+                                        font=('DOSFont', 18), bg='black', fg='lime',
+                                        activebackground='black', activeforeground='white',
+                                        relief=FLAT, borderwidth=0, highlightthickness=0)
+
+        self.turn_off_sounds_checkbox.place(x=23, y=50)
+        exit_parameters_button.place(x=0, y=395)
 
     def start_menu(self):
         # Уничтожаем текущий фрейм
@@ -339,6 +477,10 @@ class App:  # Основной класс
                                  font=('DOSFont', 18), bg='black', fg='lime',
                                  activebackground='black', activeforeground='white',
                                  relief=FLAT, borderwidth=0, highlightthickness=0)
+        parameters_button = Button(self.start_menu_frame, text='[Параметры]', command=self.parameters,
+                                   font=('DOSFont', 18), bg='black', fg='lime',
+                                   activebackground='black', activeforeground='white',
+                                   relief=FLAT, borderwidth=0, highlightthickness=0)
         exit_button = Button(self.start_menu_frame, text='[Завершить сеанс]', command=self.exit,
                              font=('DOSFont', 18), bg='black', fg='lime',
                              activebackground='black', activeforeground='white',
@@ -346,7 +488,8 @@ class App:  # Основной класс
 
         return_button.place(x=200, y=60)
         terminal_button.place(x=180, y=150)
-        exit_button.place(x=180, y=240)
+        parameters_button.place(x=213, y=230)
+        exit_button.place(x=180, y=310)
 
     def terminal_session(self):
         # Очищаем предыдущие виджеты
@@ -414,8 +557,7 @@ class App:  # Основной класс
         command = self.input_entry.get().strip()  # Получаем команду
         self.input_entry.delete(0, 'end')  # Очищаем поле ввода
 
-        if not command:  # Если команда пустая
-            self.print_output(">>> ")  # Просто выводим приглашение
+        if not command:  # Если команда пустая, выводим ничего
             return
 
         # Выводим введенную команду
@@ -426,7 +568,7 @@ class App:  # Основной класс
             self.desktop_frame()  # Возвращаемся на рабочий стол
         elif command.lower() == 'help':
             self.print_output(
-                "Доступные команды:\n  help - справка\n  exit - выход\n  cls - очистить терминал\n  create <имя> - создать файл\n  del <имя> - удалить файл\n")
+                "Доступные команды:\n  help - справка\n  quit - завершить сессию терминала\n  cls - очистить терминал\n  create <имя> - создать файл\n  del <имя> - удалить файл\n")
         elif command.lower() == 'cls':
             self.output_area.configure(state='normal')
             self.output_area.delete(1.0, 'end')  # Очищаем терминал
@@ -490,6 +632,19 @@ class App:  # Основной класс
             if not os.path.exists(filepath):
                 self.print_output(f"Ошибка: файл '{filename}' не найден\n")
                 return
+            # elif filename == "README.txt": # Для безопасности
+            #     self.print_output(f"Недопустимое название элемента, удаление невозможно\n")
+            #     return
+            elif filename == "main.pyw":
+                self.print_output(
+                    f"Этот элемент является частью системы, удаление невозможно\n")
+                return
+            # elif filename == "DOSFont.ttf":
+            #     self.print_output(f"Этот элемент является сопутствующим элементом системы, удаление невозможно\n")
+            #     return
+            # elif filename == "README.md":
+            #     self.print_output(f"Этот элемент является сопутствующим элементом системы, удаление невозможно\n")
+            #     return
 
             # Удаляем файл
             os.remove(filepath)
@@ -528,6 +683,9 @@ class App:  # Основной класс
         # Привязываем контекстное меню
         self.desktop_frame_screen.bind('<Button-3>', self.popup_context_create)
 
+        # Загружаем файлы
+        self.load_files_from_storage()
+
         # Панель времени
         current_time = datetime.now().strftime("%H:%M")
         self.time_label = Label(
@@ -548,9 +706,6 @@ class App:  # Основной класс
             relief=FLAT, borderwidth=0, highlightthickness=0, command=self.start_menu)
         self.start_button.place(x=0, y=395)
 
-        # Загружаем файлы
-        self.load_files_from_storage()
-
     def exit(self):
         sys.exit()
 
@@ -564,6 +719,7 @@ if __name__ == "__main__":
     mixer.init()
     root = Tk()
     app = App(root)
+    app.check_dos_font()
     app.create_menu()
     app.set_up_frame()
     app.start_sound()
