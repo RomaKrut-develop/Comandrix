@@ -426,7 +426,7 @@ class App:  # Основной класс
             self.desktop_frame()  # Возвращаемся на рабочий стол
         elif command.lower() == 'help':
             self.print_output(
-                "Доступные команды:\n  help - справка\n  exit - выход\n  cls - очистить терминал\n  create <имя> - создать файл\n  del <имя> - удалить файл\n  list - список файлов\n")
+                "Доступные команды:\n  help - справка\n  exit - выход\n  cls - очистить терминал\n  create <имя> - создать файл\n  del <имя> - удалить файл\n")
         elif command.lower() == 'cls':
             self.output_area.configure(state='normal')
             self.output_area.delete(1.0, 'end')  # Очищаем терминал
@@ -435,8 +435,6 @@ class App:  # Основной класс
             self.create_file_from_terminal(command[7:])
         elif command.lower().startswith('del '):
             self.delete_file_from_terminal(command[4:])
-        elif command.lower() == 'list':
-            self.list_files_in_terminal()
         else:
             self.print_output(f"Ошибка: команда '{command}' не найдена.\n")
 
